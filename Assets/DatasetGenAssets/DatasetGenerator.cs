@@ -7,6 +7,9 @@ using UnityEngine.UI;
 
 public class DatasetGenerator : MonoBehaviour
 {
+
+    public enum CameraMode {Random, Step};
+
     [Header("Config")]
     public string datasetPath;
 
@@ -14,6 +17,13 @@ public class DatasetGenerator : MonoBehaviour
     public Camera cameraSketch;
 
     public Transform cameraTarget;
+    public CameraMode cameraUpdateMode;
+
+    //TODO expor para UI.
+    public float hCamStep=20, vCamStep=45; //Vertical Step angle [0-90]; horizontal Step angle[0-180]
+    public bool camHalfSphere = false; //Render only the top view of a half sphere
+    public float radius = 4.0f; // radius (distance) around object
+    private float hCamAngle=0, vCamAngle=0;
 
     [Header("UI elements")]
     public Toggle toggleRandomizeCamPos;
@@ -78,6 +88,41 @@ public class DatasetGenerator : MonoBehaviour
     }
 
 
+    void UpdateCameraPosition(){
+        
+        if (cameraUpdateMode == CameraMode.Random){
+            Vector3 newPosition = new Vector3(
+                UnityEngine.Random.Range(-4, 4),
+                UnityEngine.Random.Range(-4, 4),
+                UnityEngine.Random.Range(.5f, 2));
+            cameraShaded.transform.position = newPosition;
+            cameraShaded.transform.LookAt(cameraTarget);
+
+        }else{
+            cameraShaded.transform.position = cameraTarget.transform.position + new Vector3(0.0f, 0.0f, -radius);
+            cameraShaded.transform.LookAt(cameraTarget);
+            cameraShaded.transform.RotateAround(cameraTarget.transform.position, Vector3.up, hCamAngle);
+            hCamAngle+=hCamStep;
+            cameraShaded.transform.RotateAround(cameraTarget.transform.position, cameraShaded.transform.right, vCamAngle);
+
+            if(hCamAngle >= 180.0f){
+
+                if(camHalfSphere){
+                    vCamAngle+=vCamStep;
+                }else if (vCamAngle>0){
+                    vCamAngle=-vCamAngle;
+                }else{
+                    vCamAngle=-vCamAngle + vCamStep;
+                }
+
+                hCamAngle=0;
+            }
+        }
+
+        cameraSketch.transform.position = cameraShaded.transform.position;
+        cameraSketch.transform.rotation = cameraShaded.transform.rotation;
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -91,15 +136,7 @@ public class DatasetGenerator : MonoBehaviour
 
             if(toggleRandomizeCamPos.isOn)
             {
-                // TODO: randomize camera position
-                cameraShaded.transform.position = new Vector3(
-                    UnityEngine.Random.Range(-4, 4),
-                    UnityEngine.Random.Range(-4, 4),
-                    UnityEngine.Random.Range(.5f, 2));
-                cameraShaded.transform.LookAt(cameraTarget);
-
-                cameraSketch.transform.position = cameraShaded.transform.position;
-                cameraSketch.transform.rotation = cameraShaded.transform.rotation;
+                UpdateCameraPosition();
             }
 
             if(toggleRandomizeLightPos.isOn)
@@ -113,13 +150,22 @@ public class DatasetGenerator : MonoBehaviour
             
             if (indexOfCurrentImage == sliderDatasetSize.value)
             {
-                isGenerating = false;
-                SetEnabledUIElements(true);
-                buttonGenerateDataset.GetComponentInChildren<Text>().text =
-                    "Generate dataset";
-                progressText.text = "";
+                Reset();
             }
         }
+    }
+
+    void Reset(){
+
+        isGenerating = false;
+        SetEnabledUIElements(true);
+        buttonGenerateDataset.GetComponentInChildren<Text>().text =
+            "Generate dataset";
+        progressText.text = "";
+
+        hCamAngle = 0;
+        vCamAngle = 0;
+
     }
 
     // Set enabled state of all UI elements (except "generate dataset" button)
