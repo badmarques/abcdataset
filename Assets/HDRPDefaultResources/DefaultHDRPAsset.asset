@@ -447,7 +447,8 @@ MonoBehaviour:
   beforeTransparentCustomPostProcesses: []
   beforeTAACustomPostProcesses: []
   beforePostProcessCustomPostProcesses: []
-  afterPostProcessCustomPostProcesses: []
+  afterPostProcessCustomPostProcesses:
+  - GrayScale, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
   virtualTexturingSettings:
     streamingCpuCacheSizeInMegaBytes: 256
     streamingGpuCacheSettings:

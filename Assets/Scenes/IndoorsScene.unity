@@ -2070,7 +2070,8 @@ GameObject:
   - component: {fileID: 1082366264}
   - component: {fileID: 1082366266}
   - component: {fileID: 1082366265}
-  m_Layer: 0
+  - component: {fileID: 1082366267}
+  m_Layer: 10
   m_Name: DatasetCameraSketch
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2155,7 +2156,7 @@ MonoBehaviour:
   clearDepth: 1
   volumeLayerMask:
     serializedVersion: 2
-    m_Bits: 1
+    m_Bits: 1025
   volumeAnchorOverride: {fileID: 0}
   antialiasing: 3
   SMAAQuality: 2
@@ -2188,7 +2189,7 @@ MonoBehaviour:
   exposureTarget: {fileID: 0}
   m_RenderingPathCustomFrameSettings:
     bitDatas:
-      data1: 72127433175695181
+      data1: 72127433174679373
       data2: 13763000468760363032
     lodBias: 1
     lodBiasMode: 0
@@ -2202,7 +2203,7 @@ MonoBehaviour:
     materialQuality: 0
   renderingPathCustomFrameSettingsOverrideMask:
     mask:
-      data1: 134381568
+      data1: 275013206016
       data2: 0
   defaultFrameSettings: 0
 --- !u!20 &1082366266
@@ -2248,6 +2249,23 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
+--- !u!114 &1082366267
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1082366263}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 172515602e62fb746b5d573b38a5fe58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isGlobal: 1
+  priority: 0
+  blendDistance: 0
+  weight: 1
+  sharedProfile: {fileID: 11400000, guid: cc37367bfc88e624eb8f2ddbfb1cef5b, type: 2}
 --- !u!1 &1160837704
 GameObject:
   m_ObjectHideFlags: 0
