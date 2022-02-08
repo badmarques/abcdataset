@@ -156,7 +156,7 @@ MonoBehaviour:
   m_DefaultLookDevProfile: {fileID: 11400000, guid: 2a734deffbb71b24aadcd3ef4f1e55e2, type: 2}
   m_RenderingPathDefaultCameraFrameSettings:
     bitDatas:
-      data1: 140666621263709
+      data1: 140666621263741
       data2: 4539628425463136280
     lodBias: 1
     lodBiasMode: 0
@@ -445,10 +445,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 5a9a2dc462c7bde4f86d0615a19c2c72, type: 2}
   - {fileID: 11400000, guid: 2b7005ba3a4d8474b8cdc34141ad766e, type: 2}
   beforeTransparentCustomPostProcesses: []
-  beforeTAACustomPostProcesses: []
+  beforeTAACustomPostProcesses:
+  - Outline, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
   beforePostProcessCustomPostProcesses: []
-  afterPostProcessCustomPostProcesses:
-  - GrayScale, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+  afterPostProcessCustomPostProcesses: []
   virtualTexturingSettings:
     streamingCpuCacheSizeInMegaBytes: 256
     streamingGpuCacheSettings:
