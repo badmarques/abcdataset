@@ -46,6 +46,8 @@ public class DatasetGenerator : MonoBehaviour
     private int indexOfCurrentImage;
     private float timeOfLastSave;
 
+    private Logger logger;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -62,6 +64,8 @@ public class DatasetGenerator : MonoBehaviour
         }
         renderTextureSketch = cameraSketch.targetTexture;
         bufferedTexSketch = new Texture2D(renderTextureSketch.width, renderTextureSketch.height, TextureFormat.RGB24, false);
+
+        logger = GetComponent<Logger>();
 
         // Set up callbacks for UI events
         sliderRadius.onValueChanged.AddListener(delegate { OnValueChangedRadius(); });
@@ -103,6 +107,11 @@ public class DatasetGenerator : MonoBehaviour
                             " of " + sliderDatasetSize.value + " ...\n";
         progressText.text += "Shaded image: " + imgPathShaded + "\n" +
                              "Sketch image: " + imgPathSketch + "\n";
+
+        if(logger){
+            logger.LogSample(Path.GetFileName(imgPathShaded), "shaded", cameraShaded.transform);
+            //logger.LogSample(Path.GetFileName(imgPathSketch), "sketch", cameraSketch.transform);
+        }
     }
 
     void UpdateCameraPosition()
@@ -189,6 +198,8 @@ public class DatasetGenerator : MonoBehaviour
         
         hCamAngle = 0;
         vCamAngle = 0;
+
+        logger.CloseLog();
     }
 
     // Set enabled state of all UI elements (except "generate dataset" button)
