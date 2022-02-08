@@ -20,18 +20,21 @@ public struct Sample{
 
 public class Logger : MonoBehaviour
 {
-    // Start is called before the first frame update
+    public bool isLogging=true;
     private DatasetGenerator datasetGen;
     void Start()
     {
         datasetGen = GetComponent<DatasetGenerator>();
         if(datasetGen == null){
             Debug.Log("logger requires a dataset generator component");
-            return;
+            isLogging= false;
         }
     }
 
     public void LogSample(string fileName, string label, Transform cameraPose){
+
+        if (!isLogging)
+            return;
 
         var sample = new Sample();
         sample.fileName = fileName;
@@ -55,6 +58,10 @@ public class Logger : MonoBehaviour
     }
 
     public void CloseLog(){
+
+        if (!isLogging)
+            return;
+
         var path = Path.Combine(datasetGen.datasetPath, "log.json");
 
         if (!File.Exists(path)){

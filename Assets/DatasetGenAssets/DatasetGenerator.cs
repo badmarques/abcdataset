@@ -110,7 +110,7 @@ public class DatasetGenerator : MonoBehaviour
 
         if(logger){
             logger.LogSample(Path.GetFileName(imgPathShaded), "shaded", cameraShaded.transform);
-            //logger.LogSample(Path.GetFileName(imgPathSketch), "sketch", cameraSketch.transform);
+            logger.LogSample(Path.GetFileName(imgPathSketch), "sketch", cameraSketch.transform);
         }
     }
 
@@ -150,6 +150,11 @@ public class DatasetGenerator : MonoBehaviour
 
                 hCamAngle = 0;
             }
+
+            Debug.Log(vCamAngle);
+            if (vCamAngle > 90.0f || vCamAngle < -90.0f){ //reset angle to prevent "upside down" camera
+                vCamAngle = 0;
+            }
         }
 
         cameraSketch.transform.position = cameraShaded.transform.position;
@@ -167,10 +172,8 @@ public class DatasetGenerator : MonoBehaviour
         {
             timeOfLastSave = Time.time;
 
-            if (toggleRandomizeCamPos.isOn)
-            {
-                UpdateCameraPosition();
-            }
+            UpdateCameraPosition();
+            
 
             if (toggleRandomizeLightPos.isOn)
             {
