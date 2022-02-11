@@ -85,6 +85,12 @@ Shader "Hidden/Shader/Outline"
 		float2 bottomRightUV = input.texcoord + float2(TexelSize.x * halfScaleCeil, -TexelSize.y * halfScaleFloor);
 		float2 topLeftUV = input.texcoord + float2(-TexelSize.x * halfScaleFloor, TexelSize.y * halfScaleCeil);
 
+        // Clamp to [0,1) to prevent false outlines at the borders
+        bottomLeftUV = clamp(bottomLeftUV, 0, 0.9999999);
+        topRightUV = clamp(topRightUV, 0, 0.999999);
+        bottomRightUV = clamp(bottomRightUV, 0, 0.9999999);
+        topLeftUV = clamp(topLeftUV, 0, 0.9999999);
+
         float3 normal0 = GetNormalVS(bottomLeftUV * _ScreenSize.xy);
         float3 normal1 = GetNormalVS(topRightUV * _ScreenSize.xy);
         float3 normal2 = GetNormalVS(bottomRightUV * _ScreenSize.xy);
