@@ -2959,6 +2959,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5b1388f361ee87548a59b7399ea39215, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isLogging: 1
 --- !u!1 &937034340
 GameObject:
   m_ObjectHideFlags: 0
@@ -3845,7 +3846,7 @@ GameObject:
   - component: {fileID: 1288560392}
   - component: {fileID: 1288560391}
   m_Layer: 0
-  m_Name: werw
+  m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

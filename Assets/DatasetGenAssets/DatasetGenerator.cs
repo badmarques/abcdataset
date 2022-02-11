@@ -133,7 +133,7 @@ public class DatasetGenerator : MonoBehaviour
             hCamAngle += sliderHCamStep.value;
             cameraShaded.transform.RotateAround(cameraTarget.transform.position, cameraShaded.transform.right, vCamAngle);
 
-            if (hCamAngle >= 180.0f)
+            if (hCamAngle >= 360.0f)
             {
                 if (toggleCamHalfSphere.isOn)
                 {
