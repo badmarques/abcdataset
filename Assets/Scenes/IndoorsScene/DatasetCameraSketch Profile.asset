@@ -79,4 +79,67 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   components:
   - {fileID: -4431343117491232674}
+  - {fileID: 4178240193117604348}
   - {fileID: -5886628360161991080}
+--- !u!114 &4178240193117604348
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 89f83259d497a7e4c97631aa6e417541, type: 3}
+  m_Name: DeNorSobOutline
+  m_EditorClassIdentifier: 
+  active: 0
+  m_AdvancedMode: 0
+  OutlineWidth:
+    m_OverrideState: 1
+    m_Value: 2
+    min: 0
+  DepthThreshold:
+    m_OverrideState: 1
+    m_Value: 900
+  NormalThreshold:
+    m_OverrideState: 1
+    m_Value: 1
+  NormalMin:
+    m_OverrideState: 0
+    m_Value: 1
+  NormalMax:
+    m_OverrideState: 0
+    m_Value: 1
+  SobelOutline:
+    m_OverrideState: 0
+    m_Value: 1
+  SobelOutlineThreshold:
+    m_OverrideState: 1
+    m_Value: 1
+    min: 0
+  WhiteThreshold:
+    m_OverrideState: 1
+    m_Value: 0.4
+  BlackThreshold:
+    m_OverrideState: 1
+    m_Value: 0.4
+  OutlineColor:
+    m_OverrideState: 1
+    m_Value: {r: 1, g: 1, b: 1, a: 1}
+    hdr: 0
+    showAlpha: 1
+    showEyeDropper: 1
+  ColorIntensity:
+    m_OverrideState: 1
+    m_Value: 1
+  MixFullScreenColor:
+    m_OverrideState: 1
+    m_Value: 0
+  ShowOutlineOnly:
+    m_OverrideState: 1
+    m_Value: 0
+  MixDephNormalAndSobelOutline:
+    m_OverrideState: 1
+    m_Value: 0
+  m_Material: {fileID: 0}
