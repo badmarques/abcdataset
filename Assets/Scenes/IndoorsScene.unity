@@ -2931,6 +2931,7 @@ MonoBehaviour:
   sliderDelay: {fileID: 1996133540}
   buttonGenerateDataset: {fileID: 305622668}
   progressText: {fileID: 2090868525}
+  cameraTransforms: []
 --- !u!4 &934295420
 Transform:
   m_ObjectHideFlags: 0

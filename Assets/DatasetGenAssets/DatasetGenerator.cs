@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.IO;
 using System;
+using System.Collections.Generic;
 
 public class DatasetGenerator : MonoBehaviour
 {
@@ -47,6 +48,13 @@ public class DatasetGenerator : MonoBehaviour
     private float timeOfLastSave;
 
     private Logger logger;
+
+    // List of camera transforms that will be used to generate the dataset
+    [HideInInspector]
+    public List<Transform> cameraTransforms = new List<Transform>();
+
+    // Whether cameraTransforms need to be updated
+    private bool isDirty = true;
 
     // Start is called before the first frame update
     void Start()
@@ -108,85 +116,112 @@ public class DatasetGenerator : MonoBehaviour
         progressText.text += "Shaded image: " + imgPathShaded + "\n" +
                              "Sketch image: " + imgPathSketch + "\n";
 
-        if(logger){
+        if (logger)
+        {
             logger.LogSample(Path.GetFileName(imgPathShaded), "shaded", cameraShaded.transform);
             logger.LogSample(Path.GetFileName(imgPathSketch), "sketch", cameraSketch.transform);
         }
     }
 
-    void UpdateCameraPosition()
-    {        
-        if (toggleRandomizeCamPos.isOn) //if (cameraUpdateMode == CameraMode.Random)
-        {
-            Vector3 newPosition = new Vector3(
-                UnityEngine.Random.Range(-4, 4),
-                UnityEngine.Random.Range(-4, 4),
-                UnityEngine.Random.Range(.5f, 2));
-            cameraShaded.transform.position = newPosition;
-            cameraShaded.transform.LookAt(cameraTarget);
-        }
-        else
-        {
-            cameraShaded.transform.position = cameraTarget.transform.position + new Vector3(0.0f, 0.0f, -sliderRadius.value);
-            cameraShaded.transform.LookAt(cameraTarget);
-            cameraShaded.transform.RotateAround(cameraTarget.transform.position, Vector3.up, hCamAngle);
-            hCamAngle += sliderHCamStep.value;
-            cameraShaded.transform.RotateAround(cameraTarget.transform.position, cameraShaded.transform.right, vCamAngle);
+    void RebuildTransforms()
+    {
+        hCamAngle = 0;
+        vCamAngle = 0;
+        cameraTransforms.Clear();
 
-            if (hCamAngle >= 360.0f)
+        for (int i = 0; i < sliderDatasetSize.value; ++i)
+        {
+            GameObject curGO = new GameObject();
+            Transform curTransform = curGO.transform;
+
+            if (toggleRandomizeCamPos.isOn)
             {
-                if (toggleCamHalfSphere.isOn)
+                curTransform.position = new Vector3(
+                    UnityEngine.Random.Range(-4, 4),
+                    UnityEngine.Random.Range(-4, 4),
+                    UnityEngine.Random.Range(.5f, 2));
+                curTransform.LookAt(cameraTarget);
+            }
+            else
+            {
+                curTransform.position = cameraTarget.transform.position + new Vector3(0.0f, 0.0f, -sliderRadius.value);
+                curTransform.LookAt(cameraTarget);
+                curTransform.RotateAround(cameraTarget.transform.position, Vector3.up, hCamAngle);
+                curTransform.RotateAround(cameraTarget.transform.position, curTransform.right, vCamAngle);
+
+                hCamAngle += sliderHCamStep.value;
+                if (hCamAngle >= 360.0f)
                 {
-                    vCamAngle += sliderVCamStep.value;
-                }
-                else if (vCamAngle > 0)
-                {
-                    vCamAngle = -vCamAngle;
-                }
-                else
-                {
-                    vCamAngle = -vCamAngle + sliderVCamStep.value;
+                    if (toggleCamHalfSphere.isOn)
+                    {
+                        vCamAngle += sliderVCamStep.value;
+                    }
+                    else if (vCamAngle > 0)
+                    {
+                        vCamAngle = -vCamAngle;
+                    }
+                    else
+                    {
+                        vCamAngle = -vCamAngle + sliderVCamStep.value;
+                    }
+                    hCamAngle = 0;
                 }
 
-                hCamAngle = 0;
+                Debug.Log(vCamAngle);
+                if (vCamAngle > 90.0f || vCamAngle < -90.0f)
+                { //reset angle to prevent "upside down" camera
+                    vCamAngle = 0;
+                }
             }
 
-            Debug.Log(vCamAngle);
-            if (vCamAngle > 90.0f || vCamAngle < -90.0f){ //reset angle to prevent "upside down" camera
-                vCamAngle = 0;
-            }
+            cameraTransforms.Add(curTransform);
         }
 
-        cameraSketch.transform.position = cameraShaded.transform.position;
-        cameraSketch.transform.rotation = cameraShaded.transform.rotation;
+        hCamAngle = 0;
+        vCamAngle = 0;
+    }
+
+    // Set the transform of the shaded and sketch cameras to the given transform
+    void SetCameraTransform(Transform transform)
+    {
+        cameraSketch.transform.position = transform.position;
+        cameraSketch.transform.rotation = transform.rotation;
+
+        cameraShaded.transform.position = transform.position;
+        cameraShaded.transform.rotation = transform.rotation;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (!isGenerating)
-            return;
-
-        // Check delay between images
-        if ((Time.time - timeOfLastSave) * 1000f > sliderDelay.value)
+        if (isDirty)
         {
-            timeOfLastSave = Time.time;
+            RebuildTransforms();
+            isDirty = false;
+        }
 
-            UpdateCameraPosition();
-            
-
-            if (toggleRandomizeLightPos.isOn)
+        if (isGenerating)
+        {
+            // Check delay between images
+            if ((Time.time - timeOfLastSave) * 1000f > sliderDelay.value)
             {
-                // TODO: randomize light position
-            }
+                SetCameraTransform(cameraTransforms[indexOfCurrentImage]);
 
-            SaveTexture();
+                if (toggleRandomizeLightPos.isOn)
+                {
+                    // TODO: randomize light position
+                }
 
-            indexOfCurrentImage++;
+                SaveTexture();
 
-            if (indexOfCurrentImage == sliderDatasetSize.value)
-            {
-                Reset();
+                // Go to next image
+                indexOfCurrentImage++;
+                if (indexOfCurrentImage == sliderDatasetSize.value)
+                {
+                    Reset();
+                }
+
+                timeOfLastSave = Time.time;
             }
         }
     }
@@ -198,7 +233,7 @@ public class DatasetGenerator : MonoBehaviour
         buttonGenerateDataset.GetComponentInChildren<Text>().text =
             "Generate dataset";
         progressText.text = "";
-        
+
         hCamAngle = 0;
         vCamAngle = 0;
 
@@ -229,6 +264,8 @@ public class DatasetGenerator : MonoBehaviour
             Debug.LogError("Invalid text component");
         }
         textComponent.text = sliderRadius.value.ToString();
+
+        isDirty = true;
     }
 
     // OnValueChange event of "Horizontal step angle" slider
@@ -242,6 +279,8 @@ public class DatasetGenerator : MonoBehaviour
             Debug.LogError("Invalid text component");
         }
         textComponent.text = sliderHCamStep.value.ToString();
+
+        isDirty = true;
     }
 
     // OnValueChange event of "Vertical step angle" slider
@@ -255,6 +294,8 @@ public class DatasetGenerator : MonoBehaviour
             Debug.LogError("Invalid text component");
         }
         textComponent.text = sliderVCamStep.value.ToString();
+
+        isDirty = true;
     }
 
     // OnValueChange event of "Randomize camera position" checkbox
@@ -263,6 +304,8 @@ public class DatasetGenerator : MonoBehaviour
         sliderRadius.gameObject.SetActive(!toggleRandomizeCamPos.isOn);
         sliderHCamStep.gameObject.SetActive(!toggleRandomizeCamPos.isOn);
         sliderVCamStep.gameObject.SetActive(!toggleRandomizeCamPos.isOn);
+
+        isDirty = true;
     }
 
     // OnValueChange event of "Dataset size" slider
@@ -276,6 +319,8 @@ public class DatasetGenerator : MonoBehaviour
             Debug.LogError("Invalid text component");
         }
         textComponent.text = sliderDatasetSize.value.ToString();
+
+        isDirty = true;
     }
 
     // OnValueChange event of "Delay" slider
