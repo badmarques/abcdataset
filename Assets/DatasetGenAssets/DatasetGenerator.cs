@@ -49,12 +49,28 @@ public class DatasetGenerator : MonoBehaviour
 
     private Logger logger;
 
-    // List of camera transforms that will be used to generate the dataset
-    [HideInInspector]
-    public List<Transform> cameraTransforms = new List<Transform>();
+    public class PositionRotation
+    {
+        public Vector3 Position;
+        public Quaternion Rotation;
 
-    // Whether cameraTransforms need to be updated
+        public PositionRotation(Vector3 position, Quaternion rotation)
+        {
+            Position = position;
+            Rotation = rotation;
+        }
+    }
+
+    // List of camera positions/rotations that will be used to generate the dataset
+    [HideInInspector]
+    public List<PositionRotation> cameraPositionRotation = new List<PositionRotation>();
+    // Whether cameraPositionRotation need to be updated
     private bool isDirty = true;
+
+    [Header("Camera/light gizmos")]
+    public Transform gizmoParent;
+    public GameObject gizmoPrefab;
+    private List<Transform> cameraGizmos = new List<Transform>();
 
     // Start is called before the first frame update
     void Start()
@@ -79,6 +95,7 @@ public class DatasetGenerator : MonoBehaviour
         sliderRadius.onValueChanged.AddListener(delegate { OnValueChangedRadius(); });
         sliderHCamStep.onValueChanged.AddListener(delegate { OnValueChangedHCamStep(); });
         sliderVCamStep.onValueChanged.AddListener(delegate { OnValueChangedVCamStep(); });
+        toggleCamHalfSphere.onValueChanged.AddListener(delegate { OnValueChangedCamHalfSphere(); });
         toggleRandomizeCamPos.onValueChanged.AddListener(delegate { OnValueChangedRandomizeCamPos(); });
         sliderDatasetSize.onValueChanged.AddListener(delegate { OnValueChangeDatasetSize(); });
         sliderDelay.onValueChanged.AddListener(delegate { OnValueChangeDelay(); });
@@ -127,19 +144,20 @@ public class DatasetGenerator : MonoBehaviour
     {
         hCamAngle = 0;
         vCamAngle = 0;
-        cameraTransforms.Clear();
+        cameraPositionRotation.Clear();
+
+        GameObject dummyGO = new GameObject();
 
         for (int i = 0; i < sliderDatasetSize.value; ++i)
         {
-            GameObject curGO = new GameObject();
-            Transform curTransform = curGO.transform;
+            Transform curTransform = dummyGO.transform;
 
             if (toggleRandomizeCamPos.isOn)
             {
                 curTransform.position = new Vector3(
-                    UnityEngine.Random.Range(-4, 4),
-                    UnityEngine.Random.Range(-4, 4),
-                    UnityEngine.Random.Range(.5f, 2));
+                    UnityEngine.Random.Range(-sliderRadius.value, sliderRadius.value),
+                    UnityEngine.Random.Range(toggleCamHalfSphere.isOn ? 0f : -sliderRadius.value, sliderRadius.value),
+                    UnityEngine.Random.Range(-sliderRadius.value, sliderRadius.value));
                 curTransform.LookAt(cameraTarget);
             }
             else
@@ -174,21 +192,40 @@ public class DatasetGenerator : MonoBehaviour
                 }
             }
 
-            cameraTransforms.Add(curTransform);
+            cameraPositionRotation.Add(new PositionRotation(curTransform.position, curTransform.rotation));
         }
+
+        Destroy(dummyGO);
 
         hCamAngle = 0;
         vCamAngle = 0;
+
+        // Update gizmos
+        if (gizmoParent != null && gizmoPrefab != null)
+        {
+            // Destroy existing gizmos
+            // TODO: reuse existing gizmos for better efficiency
+            foreach (Transform child in gizmoParent.transform)
+                Destroy(child.gameObject);
+
+            // Instantiate new gizmos
+            for (int i = 0; i < cameraPositionRotation.Count; ++i)
+            {
+                var t = cameraPositionRotation[i];
+                GameObject GO = GameObject.Instantiate(gizmoPrefab, t.Position, t.Rotation, gizmoParent);
+                GO.name = "Gizmo_" + i;
+            }
+        }
     }
 
     // Set the transform of the shaded and sketch cameras to the given transform
-    void SetCameraTransform(Transform transform)
+    void SetCameraTransform(PositionRotation pr)
     {
-        cameraSketch.transform.position = transform.position;
-        cameraSketch.transform.rotation = transform.rotation;
+        cameraSketch.transform.position = pr.Position;
+        cameraSketch.transform.rotation = pr.Rotation;
 
-        cameraShaded.transform.position = transform.position;
-        cameraShaded.transform.rotation = transform.rotation;
+        cameraShaded.transform.position = pr.Position;
+        cameraShaded.transform.rotation = pr.Rotation;
     }
 
     // Update is called once per frame
@@ -205,7 +242,7 @@ public class DatasetGenerator : MonoBehaviour
             // Check delay between images
             if ((Time.time - timeOfLastSave) * 1000f > sliderDelay.value)
             {
-                SetCameraTransform(cameraTransforms[indexOfCurrentImage]);
+                SetCameraTransform(cameraPositionRotation[indexOfCurrentImage]);
 
                 if (toggleRandomizeLightPos.isOn)
                 {
@@ -295,6 +332,13 @@ public class DatasetGenerator : MonoBehaviour
         }
         textComponent.text = sliderVCamStep.value.ToString();
 
+        isDirty = true;
+    }
+
+    
+    // OnValueChange event of "Render half sphere only" checkbox
+    public void OnValueChangedCamHalfSphere()
+    {
         isDirty = true;
     }
 
